@@ -14,7 +14,6 @@ nocite: '@*'
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 #devtools::install_github("hodgettsp/cesR")
-setwd("C:/Users/Max/OneDrive - University of Toronto/4th Year/Semester 1/STA304/Final Assessment")
 
 library(cesR)
 library(survey)
@@ -37,11 +36,11 @@ Keywords: Post-stratification, logistic regression, Canadian election, voter tur
 
 # Introduction
 
-It is important for politicians to know how they can best represent their constituents. Canadian election polling data gives important information on voting preferences of Canadians on important issues [@cesdata]. It can be difficult to get large and representative samples of citizens' voting preferences. This is especially true when data is needed to be collected over a short period of time near an election. Therefore, methods for using non-representative data to produce reliable voter models in an election are important. 
+It is important for politicians to know how they can best represent the interests of their constituents. Canadian election polling data provides important information on voting preferences of Canadians on important issues [@cesdata]. It can be difficult to obtain large and representative samples of citizens' voting preferences. Often due to time and resource constraints, the sampling procedure results in certain subpopulations being under- or over-represented, with respect to the target population. Therefore, methods for using non-representative data to produce reliable voter models in an election are important. 
 
-In this report, we use the technique of post-stratification with logistic regression models modeling the 2019 Canadian election outcome. This technique is used to make the non-representative survey data representative of the population. We will use Statistics Canada's General Social Survey administered in 2017 as census data to understand the number of people in subsets of the population. As well, we will use Canadian Election Study's 2019 phone dataset as survey data to understand the voting intentions of individuals in different groups of the population.
+In this report, we use the technique of post-stratification with logistic regression models for predicting the 2019 Canadian election outcome. This technique is used to make the sampled survey data representative of the population. We will use Statistics Canada's General Social Survey administered in 2017 as census data to understand the proportion of the population in subsets of the population. As well, we will use Canadian Election Study's 2019 phone dataset as survey data to understand the voting intentions of individuals in different subgroups of the population.
 
-The two datasets mentioned above will be used to form models of the potential Canadian election results had all eligible voters in Canada voted in the 2019 election. We will be specifically modeling the popular vote. We are interested in seeing if the popular vote would significantly change had everyone who was eligible to vote voted. In the methodology section, we describe the data that we are working with, and the models of the election intentions that were created. We then show our resulting election predictions based on the models produced in the results section. Finally, we go over what our results indicate for the importance of voter turnout. 
+The two datasets mentioned above will be used to build counterfactual models predicting the potential Canadian election results if all eligible voters in Canada had voted in the 2019 election. We will be specifically modeling the popular vote. We are interested in investigating if the popular vote would significantly change in the hypothetical scenario where all eligible voters participated in the election. In the methodology section, we describe the data, and the models of the election intentions. We then show our resulting election predictions based on the models' fits in the results section. Finally, we go over what our results indicate about the importance of increasing voter turnout. 
 
 
 ```{r, include=FALSE}
@@ -49,7 +48,7 @@ get_ces("ces2019_phone")
 ```
 ```{r, include=FALSE}
 
-gss <- read_csv("./gss.csv")
+gss <- read_csv("./data/gss.csv")
 
 # response ces2019_phone$q11 use q12 to fill in missing values?
 # indep. education?Q61
@@ -144,7 +143,7 @@ model_spoil <- svyglm(as.factor(vote_spoil) ~ sex + place_birth_canada + provinc
 
 ```{r, warning=FALSE,message=FALSE}
 # use real data to find true proportions
-final_elec_results <- read_csv("./table_tableau08.csv")
+final_elec_results <- read_csv("./data/table_tableau08.csv")
 final_elec_results <- final_elec_results %>% mutate(total_votes_for_party = rowSums(across(where(is.numeric))))
 total_voters <- sum(final_elec_results$total_votes_for_party)
 final_elec_results <- final_elec_results %>% mutate(proportion = total_votes_for_party / total_voters)
@@ -176,7 +175,7 @@ In this section, we will first explain features of the datasets that we are usin
 
 ## Data
 
-The first dataset we discuss is the General Social Survey (2017) dataset. We will be using this dataset to calculate representative population proportions for post-stratification. We selected sex, place_birth_canada, province as variables of interest. This dataset's target population is all individuals above the age of 15 (inclusive) in Canada excluding individuals in the Yukon, Northwest Territories, and Nunavut [@gssmanual]. As well, individuals in full-time institutions are excluded [@gssmanual].
+The first dataset we discuss is the General Social Survey (2017) dataset. We will be using this dataset to calculate representative population proportions to use in post-stratification. We selected sex, place_birth_canada, province as variables of interest. This dataset's target population is all individuals above the age of 15 (inclusive) in Canada excluding individuals in the Yukon, Northwest Territories, and Nunavut [@gssmanual]. As well, individuals in full-time institutions are excluded [@gssmanual].
 
 ```{r, warning=FALSE,message=FALSE}
 #CHARACTERISTIC TABLE FOR GSS
@@ -201,9 +200,9 @@ characteristics_gss$percent <- characteristics_gss$percent * 100
 kable(characteristics_gss, digits=2, caption="Characteristic table of selected variables from GSS data.")
 ```
 
-The variable sex, an individual's biological sex, was selected for analysis as there is no missing data for this variable and this variable has similar categories in the CES dataset allowing for easy post-stratification. Table 1 tells us that  $54\%$ of the sample is female, the rest male. The variable place_birth_canada, indicating if an individual was born in Canada, was selected as we thought that an individual immigrating to Canada may have an impact on their voting preference. As well, this variable has very few missing values which means we keep almost all of the information from the dataset. Some missing values were replaced if the respondent had indicated the macroregion which they were born in. In this case, if the macroregion did not include Canada then they were marked as 'Born outside of Canada'. Approximately $80\%$ of the respondents indicate that they are born in Canada according to table 1. The last variable selected is province which is the current province that the respondent resides in. We selected this as we thought that location where an individual lives may play into their voting preference.  As well, this variable is missing zero values and is similar to the province categories provided in the CES dataset. A drawback of this variable is that it unfortunately does not include territories while the CES dataset does, this means that we do not include territories in our analysis. In table 1, we see the percent of the respondents that indicated that they reside in each province. 
+The variable sex, an individual's biological sex, was selected for analysis as there is no missing data for this variable and this variable has similar categories in the CES dataset allowing for straightforward post-stratification. Table 1 tells us that  $54\%$ of the sample is female, the rest male. The variable place_birth_canada, indicating if an individual was born in Canada, was selected as we thought that an individual immigrating to Canada may have an impact on their voting preference. As well, this variable has very few missing values which means we keep almost all of the information from the dataset. Some missing values were replaced if the respondent had indicated the macroregion which they were born in. In this case, if the macroregion did not include Canada then they were marked as 'Born outside of Canada'. Approximately $80\%$ of the respondents indicate that they are born in Canada according to Table 1. The last variable selected is province which is the current province that the respondent resides in. We selected this as we thought that location where an individual lives may play into their voting preference.  As well, this variable is missing zero values and is similar to the province categories provided in the CES dataset. A drawback of this variable is that it unfortunately does not include territories while the CES dataset does, this means that we do not include territories in our analysis. In Table 1, we see the proportion of individuals reporting to reside in each province.
 
-The second dataset we discuss is the Canadian Election Study (2019) phone survey [@cesdata]. We will be using this dataset to form our model on voting preference. This survey was performed over phone through sampling Canadian phone numbers [@cesdata]. The phone calls were performed the day after the election [@cesdata]. The variables selected from this dataset were sex, place_birth_canada, province, and voting_pref. This dataset only includes individuals eighteen years old or older [@cesdata].
+The second dataset we discuss is the Canadian Election Study (2019) phone survey [@cesdata]. We will be using this dataset to form our model on voting preference. This survey was performed over phone through stratified random sampling of Canadian phone numbers [@cesdata]. The phone calls were performed the day after the election [@cesdata]. The variables selected from this dataset were sex, place_birth_canada, province, and voting_pref. This dataset only includes individuals eighteen years old or older [@cesdata].
 
 ```{r, warning=FALSE,message=FALSE}
 # CHARACTERISTIC TABLE FOR CES
@@ -228,18 +227,18 @@ characteristics_ces$percent <- characteristics_ces$percent * 100
 kable(characteristics_ces, digits=2, caption="Characteristic table of selected variables from CES data.")
 ```
 
-The variable sex was created based on the variable q3, gender, in the dataset. This variable was reduced to sex as the method for determining gender was not sufficient, only involved the interviewer defining their gender based on voice tone [@cesdata]. This variable was chosen as it is easily modified to fit with the values found for sex in the GSS dataset. In table 2 we see that approximately 43% of the respondents were identified to be Female. The variable place_birth_canada was created based on the variable q64, the country of birth, by reducing the variable to be a binary indicating only if an individual was born in Canada or not. This was done to match the GSS dataset and allow easier computations later on. It was found that 85% of the respondents were born in Canada according to table 2. The province variable was created based on the variable q4, the province where they reside. Respondents who indicated living in Nunavut, Northwest Territories, and Yukon were removed as the census dataset does not include those regions. In table 2, we see the percent of the total respondents surveyed that reside in each province. The variable voting_pref indicates the voting preference of the respondent. It was created based on q11 and q12 which describe the voting preference of the respondent, q12 data was used if q11 data was missing. The variable has popular party names indicated and then all other responses indicated as other. 
+The variable sex was created based on the variable q3, gender, in the dataset. This variable was reduced to sex as the method for determining gender was not sufficient, because it only involved the interviewer deducing the respondent's gender based on voice pitch [@cesdata]. This variable was chosen as it is easily modified to fit with the values found for sex in the GSS dataset. In table 2 we see that approximately 43% of the respondents were identified to be female. The variable place_birth_canada was created based on the variable q64, the country of birth, by reducing the variable to be a binary indicating only if an individual was born in Canada or not. This was done to match the GSS dataset and allow easier computations later on. It was found that 85% of the respondents were born in Canada according to table 2. The province variable was created based on the variable q4, the province where they reside. Respondents who indicated living in Nunavut, Northwest Territories, and Yukon were removed as the census dataset does not include those regions. In table 2, we see the percent of the total respondents surveyed that reside in each province. The variable voting_pref indicates the voting preference of the respondent. It was created based on q11 and q12 which describe the voting preference of the respondent, q12 data was used if q11 data was missing. The variable has popular party names indicated and then all other responses indicated as other. 
 
 ## Model
 
-We are looking to predict the popular vote for the 2019 Canadian election had all potential voters in Canada voted.  This will be modeled using multiple logistic regression models, one for each party in the data and spoiled ballots, where for each we have a binary response variable created which indicates 1 if the respondent plans to vote for that party and 0 otherwise. 
+We are looking to predict the popular vote for the 2019 Canadian election had all potential voters in Canada voted.  This will be modeled using multiple logistic regression models, one for each party in the data and one for spoiled ballots. For each model, we have a binary response variable created which indicates 1 if the respondent plans to vote for that option and 0 otherwise. 
 
 Our logistic regression models will model the log-odds of voting for a party. For example, one model will be modeling the log-odds of voting for the Liberal Party of Canada. There will be a model for voting Liberal, Conservative, NDP, BQ, Green Party, People's Party, other, and spoiling the ballot. The model formula is the following:
 
 $$ log(\frac{p}{1-p}) = \beta_0+\beta_1  x_{1} + \beta_2  x_{2}+ \beta_3 x_3 + \beta_4 x_4 + \beta_5 x_5 + ... + \beta_{14}  x_{14} + \epsilon$$
 where $x_1$ is sex equaling male, $x_2$ is sex equaling female, $x_3$ is place_birth_canada equaling 'Born in Canada', $x_4$ is place_birth_Canada equaling 'Born outside of Canada', and $x_5$ to $x_14$ are the provinces of Canada excluding Nunavut, Yukon, and Northwest Territories. As well, $p$ represents the percent of votes given the sex, birth place, and province being for a party. Beta values indicate the change in log-odds expected if a given category is true except $\beta_0$ which is the intercept of the model.
 
-The model was selected as the predictor variables used are in both datasets. As well, we think that the predictor variables may have a relationship with voting preference as they subset the population into large groups that share some common characteristics.
+The model was selected as the predictor variables used are available in both datasets. As well, it is plausible that the predictor variables are associated with voting preference as they subset the population into large groups that share some common characteristics.
 
 ### Post-stratification
 
@@ -300,7 +299,8 @@ kable(tibble(party = results$party, pop_vote = results$real_vote * 100), digits 
 
 Table 4 provides the actual popular vote results from the 2019 Canadian Election [@realresults]. We lack data for the number of spoiled ballots in this data. 
 
-
+\begin{center}Figure 1: Plot of predicted popular vote confidence intervals, and the actual popular vote collected in the 2019 election.
+\end{center}
 ```{r, warning=FALSE,message=FALSE, fig.cap = "Plot of predicted popular vote confidence intervals, and the actual popular vote collected in the 2019 election."}
 ggplot(results) + geom_pointrange(aes(x=party, y=popular_vote, ymin=ymin, ymax=ymax)) +  geom_point(aes(x=party, y=real_vote), color='yellow') + ggtitle("Predicted Popular Vote Percent for Each Party and \n Actual Popular Vote Percent") + ylab("Percent of Popular Vote") + xlab("Political Party")
 ```
@@ -314,7 +314,7 @@ In summary, we created eight logistic regression models predicting the proportio
 
 ## Conclusions
 
-In our results, we see the scenario where everyone eligible votes in Canada excluding Nunavut, Northwest Territories, and Yukon. In figure 1, we see the plotted predicted results and actual results from the 2019 federal election. There is a noticeable difference in the predicted results from the actual results for the Bloc Quebecois Party and the Green Party. For the BQ Party, we predict less proportional support had everyone voted while the Green Party we predict more proportional support had everyone voted. Other parties seem to have quite similar results. Based on the variance in results for the BQ Party and Green Party though we conclude that there is an impact of having everyone vote on the election results.
+In our results, we see the scenario where every eligible citizen in Canada excluding Nunavut, Northwest Territories, and Yukon. In figure 1, we see the plotted predicted results and actual results from the 2019 federal election. There is a noticeable difference in the predicted results from the actual results for the Bloc Quebecois Party and the Green Party. For the BQ Party, we predict less proportional support had everyone voted while the Green Party we predict more proportional support had everyone voted. Other parties seem to have quite similar results. Based on the variance in results for the BQ Party and Green Party though we conclude that there is an impact of having everyone vote on the election results.
 
 As well, based on these results we would predict a Liberal win of the popular vote, as the predicted popular vote is higher than all others. This differs from the actual popular vote winner the Conservative Party. This as well supports our conclusion that there is a noticeable impact of having evreyone vote.
 
