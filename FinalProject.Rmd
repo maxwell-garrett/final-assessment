@@ -328,4 +328,49 @@ The second important weakness to consider is that we are looking at the popular 
 
 The third important weakness is the handling of sex and gender in both datasets. The CES dataset has the phone operator record gender, but only ask for the gender of an individual when unsure [@cesdata]. This is not an accurate way to record sex or gender as voice is not a reliable indicator of this. An improvement to this problem would be finding a dataset that collects gender through asking directly in the interview. This way an accurate answer by the respondent is given.
 
+# Appendix
+
+## Liberal Party Model
+```{r}
+model_lib %>% broom::tidy() %>% kable(digits=2)
+
+lib_pop <- popular_vote_pred(model_lib)
+cons_pop <- popular_vote_pred(model_cons)
+ndp_pop <- popular_vote_pred(model_ndp)
+bloc_pop <- popular_vote_pred(model_bloc)
+green_pop <- popular_vote_pred(model_green)
+people_pop <- popular_vote_pred(model_people)
+other_pop <- popular_vote_pred(model_other)
+spoil_pop <- popular_vote_pred(model_spoil)
+```
+## Conservative Party Model
+```{r}
+model_cons %>% broom::tidy() %>% kable(digits=2)
+```
+## NDP Model
+```{r}
+model_ndp %>% broom::tidy() %>% kable(digits=2)
+```
+## BQ Party Model
+```{r}
+model_bloc %>% broom::tidy() %>% kable(digits=2)
+```
+## Green Party Model
+```{r}
+model_green %>% broom::tidy() %>% kable(digits=2)
+```
+## People's Party Model
+```{r}
+model_people %>% broom::tidy() %>% kable(digits=2)
+```
+## Other Parties Model
+```{r}
+model_other %>% broom::tidy() %>% kable(digits=2)
+```
+## Spoiled Votes Model
+```{r}
+model_spoil %>% broom::tidy() %>% kable(digits=2)
+```
+
+
 # References
