@@ -34,7 +34,7 @@
 
 
 #### Workspace set-up ####
-setwd('C:/Users/Max/OneDrive - University of Toronto/4th Year/Semester 1/STA304/Final Assessment')
+setwd('C:/Users/Max/OneDrive - University of Toronto/4th Year/Semester 1/STA304/Final Assessment/GIT VERSIOn/final-assessment/data')
 library(janitor)
 library(tidyverse)
 
