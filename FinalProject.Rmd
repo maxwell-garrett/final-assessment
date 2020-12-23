@@ -236,7 +236,7 @@ We are looking to predict the popular vote for the 2019 Canadian election had al
 Our logistic regression models will model the log-odds of voting for a party. For example, one model will be modeling the log-odds of voting for the Liberal Party of Canada. There will be a model for voting Liberal, Conservative, NDP, BQ, Green Party, People's Party, other, and spoiling the ballot. The model formula is the following with all covariates being indicator variables taking on the values 0 or 1:
 
 $$ log(\frac{p}{1-p}) = \beta_0+\beta_1  x_{1} + \beta_2  x_{2}+ \beta_3 x_3 + ... + \beta_{11}  x_{11} + \epsilon$$
-where $x_1$ is sex equaling male, $x_2$ is place_birth_Canada equaling 'Born outside of Canada', and $x_3$ to $x_{11}$ are the provinces of Canada excluding Nunavut, Yukon, and Northwest Territories. The province of Alberta, sex equaling female, and place_birth_canada equaling 'Born in Canada' are set as the reference group. As well, $p$ represents the percent of votes for a party conditional on the covariate values of sex, birth place, and province. The intercept ($\beta_{0}$) represents the estimated log-odds of voting for a particular party for an individual in the reference group (i.e. an individual who is female, born in Canada, and residing in Alberta). Thus, the exponentiated intercept ($e^{\beta_0}$) represents the estimated odds of voting for a particular party for an individual in the reference group.
+where $x_1$ is if sex equals male, $x_2$ is if place_birth_Canada equals 'Born outside of Canada', and $x_3$ to $x_{11}$ are the provinces of Canada excluding Nunavut, Yukon, and Northwest Territories. The province of Alberta, sex equaling female, and place_birth_canada equaling 'Born in Canada' are set as the reference group. As well, $p$ represents the percent of votes for a party conditional on the covariate values of sex, birth place, and province. The intercept ($\beta_{0}$) represents the estimated log-odds of voting for a particular party for an individual in the reference group (i.e. an individual who is female, born in Canada, and residing in Alberta). Thus, the exponentiated intercept ($e^{\beta_0}$) represents the estimated odds of voting for a particular party for an individual in the reference group.
 
 The regression coefficients ($\beta_{1}$ to $\beta_{11}$) represent the expected change in the log odds of voting for a particular party (depending on the model) for a unit increase in the corresponding predictor variable, holding the other predictor variables constant at a certain value. Therefore, exponentiating the coefficients represents the expected odds ratio. Additionally, since all of our predictor variables are categorical, a one unit increase means comparing an observation in the reference category to an observation in a different category (e.g. comparing individuals residing in Alberta to individuals residing in Ontario). For example, $e^{\beta_{1}}$ represents the expected odds of a male individual ($x_{1}=1$) voting for a particular party, over the odds of voting for a particular party for females ($x_{1}=0$), keeping the other covariates constant (for example, comparing only individuals residing in Ontario, and born outside of Canada).
 
@@ -245,6 +245,7 @@ The model was selected as the predictor variables used are available in both dat
 ### Post-stratification
 
 We use the census dataset (GSS) to find the number of respondents in each bin of the population. There are forty bins created total, each bin based on sex, birth place, and province. For each model, we predict the proportion of a given bin that would vote for the party or submit a spoilled ballot. We multiply this proportion by the number of respondents in the bin and divide by the total number of respondents in GSS. We then add up all the proportion estimates for bins, and this is our estimate for the proportion of the population voting for a political party. As well, we use the standard error for each bin estimate from the model to calculate a $95\%$ confidence interval of the proportion of voters for a given party (or submitted a spoiled ballot). 
+\newpage
 
 # Results
 
@@ -300,6 +301,7 @@ kable(tibble(party = results$party, pop_vote = results$real_vote * 100), digits 
 ```
 
 Table 4 provides the actual observed popular vote results from the 2019 Canadian Election [@realresults]. We lack information on the number of spoiled ballots in this dataset.
+\newpage
 
 \begin{center}Figure 1: Plot of predicted popular vote confidence intervals, and the actual popular vote collected in the 2019 election.
 \end{center}
@@ -333,6 +335,7 @@ The third important weakness is the handling of sex and gender in both datasets.
 A fourth weakness is the limited number of covariates considered in the models. More covariates would potentially explain more variation in the data. Future work would include incorporating additional covariates into the analysis, and dealing with missing values using imputation techniques [@whitemultiple].
 
 Additionally, further statistical work on modeling could include using a multinomial regression for this multiclass problem instead of running multiple individual binary logistic regressions [@agresticategorical]. This technique has the advantage of potentially reducing standard errors, and therefore allowing for more precise estimates [@agresticategorical].
+\newpage
 
 # Appendix
 
@@ -369,5 +372,6 @@ model_other %>% broom::tidy() %>% kable(digits=2)
 model_spoil %>% broom::tidy() %>% kable(digits=2)
 ```
 
+\newpage
 
 # References
